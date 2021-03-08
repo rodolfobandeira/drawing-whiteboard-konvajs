@@ -81,6 +81,7 @@ stage.on('mousemove touchmove', function() {
     x: pos.x - image.x(),
     y: pos.y - image.y()
   };
+
   context.lineTo(localPos.x, localPos.y);
   context.closePath();
   context.stroke();
@@ -92,5 +93,9 @@ stage.on('mousemove touchmove', function() {
 var select = document.getElementById('tool');
 select.addEventListener('change', function() {
   mode = select.value;
+
+  if (mode == 'save') {
+    console.log(JSON.stringify({ image: canvas.toDataURL(), date: Date.now() }));
+  }
 });
 
