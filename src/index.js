@@ -1,18 +1,5 @@
 import Konva from 'konva';
 
-/*
-function component() {
-  const element = document.createElement('div');
-
-  element.innerHTML = _.join(['Hello', 'webpack'], ' ');
-
-  return element;
-}
-
-document.body.appendChild(component());
-*/
-
-
 var width = window.innerWidth;
 var height = window.innerHeight - 25;
 
@@ -85,7 +72,6 @@ stage.on('mousemove touchmove', function() {
   context.lineTo(localPos.x, localPos.y);
   context.closePath();
   context.stroke();
-
   lastPointerPosition = pos;
   layer.batchDraw();
 });
