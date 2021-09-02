@@ -48,10 +48,48 @@ stage.on('mousemove touchmove', function() {
     return;
   }
 
-  if (mode === 'brush') {
+  if (mode === 'white') {
     context.globalCompositeOperation = 'source-over';
     context.lineWidth = 3;
+    context.strokeStyle = '#ffffff';
   }
+
+  if (mode === 'yellow') {
+    context.globalCompositeOperation = 'source-over';
+    context.lineWidth = 3;
+    context.strokeStyle = '#ffff33';
+  }
+
+  if (mode === 'green') {
+    context.globalCompositeOperation = 'source-over';
+    context.lineWidth = 3;
+    context.strokeStyle = '#ccff33';
+  }
+
+  if (mode === 'red') {
+    context.globalCompositeOperation = 'source-over';
+    context.lineWidth = 3;
+    context.strokeStyle = '#ff0000';
+  }
+
+  if (mode === 'blue') {
+    context.globalCompositeOperation = 'source-over';
+    context.lineWidth = 3;
+    context.strokeStyle = '#0099cc';
+  }
+
+  if (mode === 'orange') {
+    context.globalCompositeOperation = 'source-over';
+    context.lineWidth = 3;
+    context.strokeStyle = '#ff9900';
+  }
+
+  if (mode === 'pink') {
+    context.globalCompositeOperation = 'source-over';
+    context.lineWidth = 3;
+    context.strokeStyle = '#ff0099';
+  }
+
   if (mode === 'eraser') {
     context.globalCompositeOperation = 'destination-out';
     context.lineWidth = 40;
