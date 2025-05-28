@@ -4,11 +4,11 @@
   "description": "",
   "private": true,
   "dependencies": {
-    "konva": "^7.2.5"
+    "konva": "^9.3.20"
   },
   "devDependencies": {
-    "webpack": "^5.24.3",
-    "webpack-cli": "^4.5.0"
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

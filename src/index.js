@@ -1,5 +1,9 @@
 import Konva from 'konva';
 
+// Make functions available globally
+window.changeColor = null;
+window.activateTool = null;
+
 var width = window.innerWidth;
 var height = window.innerHeight - 25;
 
@@ -12,47 +16,63 @@ var stage = new Konva.Stage({
 var layer = new Konva.Layer();
 stage.add(layer);
 
-var canvas = document.createElement('canvas');
-canvas.width = stage.width();
-canvas.height = stage.height();
-
-var image = new Konva.Image({
-  image: canvas,
-  x: 0,
-  y: 0
-});
-layer.add(image);
-stage.draw();
-
-var context = canvas.getContext('2d');
-context.strokeStyle = '#ffffff';
-context.lineJoin = 'round';
-context.lineCap = 'round';
-context.lineWidth = 3;
-
 var isPaint = false;
 var lastPointerPosition;
 var mode = 'brush';
 var currentColor = '#ffffff';
+var lastLine;
+
+// Function to change color
+window.changeColor = function(color) {
+  console.log('Changing color to:', color);
+  
+  // Remove selected class from all circles
+  document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+  
+  // Add selected class to clicked circle
+  document.querySelector(`[data-color="${color}"]`).classList.add('selected');
+  
+  // Update current color
+  currentColor = color;
+};
+
+// Function to activate tools
+window.activateTool = function(toolName) {
+  console.log('Activating tool:', toolName);
+  
+  // Update active button
+  document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tool="${toolName}"]`).classList.add('active');
+  
+  // Update mode
+  mode = toolName;
+};
 
 // Handle color selection
 document.querySelectorAll('.color-circle').forEach(circle => {
-  circle.addEventListener('click', function() {
+  circle.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Remove selected class from all circles
     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+    
     // Add selected class to clicked circle
     this.classList.add('selected');
+    
     // Update current color
     currentColor = this.dataset.color;
-    context.strokeStyle = currentColor;
   });
 });
 
 // Handle tool selection
 document.querySelectorAll('.tool-button').forEach(button => {
-  button.addEventListener('click', function() {
+  button.addEventListener('click', function(e) {
+    e.stopPropagation();
+    
     if (this.dataset.tool === 'save') {
-      console.log(JSON.stringify({ image: canvas.toDataURL(), date: Date.now() }));
+      const dataURL = stage.toDataURL();
+      console.log(JSON.stringify({ image: dataURL, date: Date.now() }));
       return;
     }
     
@@ -65,46 +85,41 @@ document.querySelectorAll('.tool-button').forEach(button => {
   });
 });
 
-image.on('mousedown touchstart', function() {
+// Initialize with brush mode and white color
+window.activateTool('brush');
+window.changeColor('#ffffff');
+
+stage.on('pointerdown', function(e) {
   isPaint = true;
   lastPointerPosition = stage.getPointerPosition();
+  
+  // Create a new line
+  lastLine = new Konva.Line({
+    stroke: currentColor,
+    strokeWidth: mode === 'brush' ? 3 : 40,
+    globalCompositeOperation: mode === 'brush' ? 'source-over' : 'destination-out',
+    points: [lastPointerPosition.x, lastPointerPosition.y],
+    lineCap: 'round',
+    lineJoin: 'round'
+  });
+  layer.add(lastLine);
 });
 
-stage.on('mouseup touchend', function() {
+stage.on('pointerup', function() {
   isPaint = false;
 });
 
-stage.on('mousemove touchmove', function() {
+stage.on('pointermove', function() {
   if (!isPaint) {
     return;
   }
 
-  if (mode === 'brush') {
-    context.globalCompositeOperation = 'source-over';
-    context.lineWidth = 3;
-    context.strokeStyle = currentColor;
-  }
-  if (mode === 'eraser') {
-    context.globalCompositeOperation = 'destination-out';
-    context.lineWidth = 40;
-  }
-  context.beginPath();
+  const pos = stage.getPointerPosition();
+  if (!pos) return;
 
-  var localPos = {
-    x: lastPointerPosition.x - image.x(),
-    y: lastPointerPosition.y - image.y()
-  };
-  context.moveTo(localPos.x, localPos.y);
-  var pos = stage.getPointerPosition();
-  localPos = {
-    x: pos.x - image.x(),
-    y: pos.y - image.y()
-  };
-
-  context.lineTo(localPos.x, localPos.y);
-  context.closePath();
-  context.stroke();
-  lastPointerPosition = pos;
+  // Add point to line
+  const newPoints = lastLine.points().concat([pos.x, pos.y]);
+  lastLine.points(newPoints);
   layer.batchDraw();
 });
 
