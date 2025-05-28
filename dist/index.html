@@ -78,10 +78,13 @@
   </style>
 </head>
 <body>
+<input type="file" id="import-json" accept=".json" style="margin-left: 20px;"/>
+
   <div id="toolbar">
     <button id="brush">Brush</button>
     <button id="eraser">Eraser</button>
     <button id="clear">Clear Screen</button>
+    <button id="export-json">Export Drawing (JSON)</button>
   </div>
 
   <div class="color-picker" id="colors">
@@ -168,6 +171,43 @@
         eraserCursor.style.top = `${e.clientY - 25}px`;
       }
     });
+
+    document.getElementById('export-json').onclick = () => {
+      const imageData = canvas.toDataURL('image/png'); // You can use base64 PNG
+      const data = {
+        image: imageData,
+        timestamp: Date.now()
+      };
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'whiteboard-drawing.json';
+      link.click();
+    };
+
+document.getElementById('import-json').addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.image) {
+        const img = new Image();
+        img.src = data.image;
+        img.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+        };
+      }
+    } catch (err) {
+      alert('Invalid drawing file.');
+    }
+  };
+  reader.readAsText(file);
+});
+
 
     window.addEventListener('resize', () => {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
