@@ -10,14 +10,61 @@
         overflow: hidden;
         background-color: #000000;
       }
+      #color-palette {
+        position: fixed;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .color-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color 0.2s;
+      }
+      .color-circle.selected {
+        border-color: #ffffff;
+      }
+      #tool-buttons {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        gap: 10px;
+      }
+      .tool-button {
+        padding: 8px 16px;
+        background: #333;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .tool-button.active {
+        background: #666;
+      }
     </style>
   </head>
   <body>
-    <select id="tool">
-      <option value="brush">Brush</option>
-      <option value="eraser">Eraser</option>
-      <option value="save">Save</option>
-    </select>
+    <div id="tool-buttons">
+      <button class="tool-button active" data-tool="brush">Brush</button>
+      <button class="tool-button" data-tool="eraser">Eraser</button>
+      <button class="tool-button" data-tool="save">Save</button>
+    </div>
+    <div id="color-palette">
+      <div class="color-circle selected" style="background-color: #ffffff" data-color="#ffffff"></div>
+      <div class="color-circle" style="background-color: #ff0000" data-color="#ff0000"></div>
+      <div class="color-circle" style="background-color: #00ff00" data-color="#00ff00"></div>
+      <div class="color-circle" style="background-color: #0000ff" data-color="#0000ff"></div>
+      <div class="color-circle" style="background-color: #ffff00" data-color="#ffff00"></div>
+      <div class="color-circle" style="background-color: #ff00ff" data-color="#ff00ff"></div>
+      <div class="color-circle" style="background-color: #00ffff" data-color="#00ffff"></div>
+    </div>
     <div id="container"></div>
     <script src="main.js"></script>
   </body>

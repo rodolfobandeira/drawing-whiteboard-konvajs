@@ -33,6 +33,37 @@ context.lineWidth = 3;
 var isPaint = false;
 var lastPointerPosition;
 var mode = 'brush';
+var currentColor = '#ffffff';
+
+// Handle color selection
+document.querySelectorAll('.color-circle').forEach(circle => {
+  circle.addEventListener('click', function() {
+    // Remove selected class from all circles
+    document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+    // Add selected class to clicked circle
+    this.classList.add('selected');
+    // Update current color
+    currentColor = this.dataset.color;
+    context.strokeStyle = currentColor;
+  });
+});
+
+// Handle tool selection
+document.querySelectorAll('.tool-button').forEach(button => {
+  button.addEventListener('click', function() {
+    if (this.dataset.tool === 'save') {
+      console.log(JSON.stringify({ image: canvas.toDataURL(), date: Date.now() }));
+      return;
+    }
+    
+    // Update active button
+    document.querySelectorAll('.tool-button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    
+    // Update mode
+    mode = this.dataset.tool;
+  });
+});
 
 image.on('mousedown touchstart', function() {
   isPaint = true;
@@ -51,6 +82,7 @@ stage.on('mousemove touchmove', function() {
   if (mode === 'brush') {
     context.globalCompositeOperation = 'source-over';
     context.lineWidth = 3;
+    context.strokeStyle = currentColor;
   }
   if (mode === 'eraser') {
     context.globalCompositeOperation = 'destination-out';
@@ -74,14 +106,5 @@ stage.on('mousemove touchmove', function() {
   context.stroke();
   lastPointerPosition = pos;
   layer.batchDraw();
-});
-
-var select = document.getElementById('tool');
-select.addEventListener('change', function() {
-  mode = select.value;
-
-  if (mode == 'save') {
-    console.log(JSON.stringify({ image: canvas.toDataURL(), date: Date.now() }));
-  }
 });
 
