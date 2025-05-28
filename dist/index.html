@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Whiteboard</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    #toolbar {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    button {
+      background: #444;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #666;
+    }
+
+    .color-picker {
+      position: fixed;
+      top: 90px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .color {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid white;
+      display: block;
+    }
+
+    .color:hover {
+      border: 2px solid yellow;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    #eraser-cursor {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      border: 2px solid white;
+      background-color: transparent;
+      z-index: 15;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <button id="brush">Brush</button>
+    <button id="eraser">Eraser</button>
+  </div>
+
+  <div class="color-picker" id="colors">
+    <div class="color" style="background-color: white;" tabindex="0" role="button"></div>
+    <div class="color" style="background-color: red;" tabindex="0" role="button"></div>
+    <div class="color" style="background-color: lime;" tabindex="0" role="button"></div>
+    <div class="color" style="background-color: blue;" tabindex="0" role="button"></div>
+    <div class="color" style="background-color: yellow;" tabindex="0" role="button"></div>
+    <div class="color" style="background-color: magenta;" tabindex="0" role="button"></div>
+    <div class="color" style="background-color: cyan;" tabindex="0" role="button"></div>
+  </div>
+
+  <div id="eraser-cursor"></div>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const eraserCursor = document.getElementById('eraser-cursor');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let drawing = false;
+    let erasing = false;
+    let currentColor = 'white';
+
+    document.getElementById('brush').onclick = () => {
+      erasing = false;
+      eraserCursor.style.display = 'none';
+    };
+
+    document.getElementById('eraser').onclick = () => {
+      erasing = true;
+      eraserCursor.style.display = 'block';
+    };
+
+    document.querySelectorAll('.color').forEach(el => {
+      el.addEventListener('click', () => {
+        currentColor = el.style.backgroundColor;
+        erasing = false; // Disable eraser on color pick
+        eraserCursor.style.display = 'none';
+      });
+    });
+
+    canvas.addEventListener('mousedown', () => drawing = true);
+    canvas.addEventListener('mouseup', () => {
+      drawing = false;
+      ctx.beginPath();
+    });
+    canvas.addEventListener('mouseout', () => {
+      drawing = false;
+      ctx.beginPath();
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (drawing) {
+        ctx.lineWidth = erasing ? 50 : 5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = erasing ? 'black' : currentColor;
+
+        ctx.lineTo(e.clientX, e.clientY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX, e.clientY);
+      }
+
+      if (erasing) {
+        eraserCursor.style.left = `${e.clientX - 25}px`;
+        eraserCursor.style.top = `${e.clientY - 25}px`;
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.putImageData(imageData, 0, 0);
+    });
+  </script>
+</body>
+</html>
+
