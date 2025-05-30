@@ -78,13 +78,13 @@
   </style>
 </head>
 <body>
-<input type="file" id="import-json" accept=".json" style="margin-left: 20px;"/>
-
   <div id="toolbar">
     <button id="brush">Brush</button>
     <button id="eraser">Eraser</button>
     <button id="clear">Clear Screen</button>
     <button id="export-json">Export Drawing (JSON)</button>
+    <button id="import-json-btn">Import Drawing</button>
+    <input type="file" id="import-json" accept=".json" style="display: none;"/>
   </div>
 
   <div class="color-picker" id="colors">
@@ -185,29 +185,32 @@
       link.click();
     };
 
-document.getElementById('import-json').addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+    document.getElementById('import-json-btn').onclick = () => {
+      document.getElementById('import-json').click();
+    };
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.image) {
-        const img = new Image();
-        img.src = data.image;
-        img.onload = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0);
-        };
-      }
-    } catch (err) {
-      alert('Invalid drawing file.');
-    }
-  };
-  reader.readAsText(file);
-});
+    document.getElementById('import-json').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
 
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.image) {
+            const img = new Image();
+            img.src = data.image;
+            img.onload = () => {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(img, 0, 0);
+            };
+          }
+        } catch (err) {
+          alert('Invalid drawing file.');
+        }
+      };
+      reader.readAsText(file);
+    });
 
     window.addEventListener('resize', () => {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
