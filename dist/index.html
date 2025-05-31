@@ -81,6 +81,7 @@
   <div id="toolbar">
     <button id="brush">Brush</button>
     <button id="eraser">Eraser</button>
+    <button id="move">Move</button>
     <button id="clear">Clear Screen</button>
     <button id="export-json">Export Drawing (JSON)</button>
     <button id="import-json-btn">Import Drawing</button>
@@ -118,16 +119,32 @@
 
     let drawing = false;
     let erasing = false;
+    let moving = false;
     let currentColor = 'white';
+    let lastX = 0;
+    let lastY = 0;
+    let offsetX = 0;
+    let offsetY = 0;
 
     document.getElementById('brush').onclick = () => {
       erasing = false;
+      moving = false;
       eraserCursor.style.display = 'none';
+      canvas.style.cursor = 'crosshair';
     };
 
     document.getElementById('eraser').onclick = () => {
       erasing = true;
+      moving = false;
       eraserCursor.style.display = 'block';
+      canvas.style.cursor = 'default';
+    };
+
+    document.getElementById('move').onclick = () => {
+      erasing = false;
+      moving = true;
+      eraserCursor.style.display = 'none';
+      canvas.style.cursor = 'grab';
     };
 
     document.getElementById('clear').onclick = () => {
@@ -143,27 +160,61 @@
       });
     });
 
-    canvas.addEventListener('mousedown', () => drawing = true);
+    canvas.addEventListener('mousedown', (e) => {
+      drawing = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (moving) {
+        canvas.style.cursor = 'grabbing';
+      }
+    });
+
     canvas.addEventListener('mouseup', () => {
       drawing = false;
+      if (moving) {
+        canvas.style.cursor = 'grab';
+      }
       ctx.beginPath();
       localStorage.setItem('whiteboardDrawing', canvas.toDataURL());
     });
+
     canvas.addEventListener('mouseout', () => {
       drawing = false;
+      if (moving) {
+        canvas.style.cursor = 'grab';
+      }
       ctx.beginPath();
     });
 
     canvas.addEventListener('mousemove', (e) => {
       if (drawing) {
-        ctx.lineWidth = erasing ? 50 : 3;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = erasing ? 'black' : currentColor;
+        if (moving) {
+          const dx = e.clientX - lastX;
+          const dy = e.clientY - lastY;
+          offsetX += dx;
+          offsetY += dy;
+          
+          // Save current canvas state
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          
+          // Clear canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          // Redraw with offset
+          ctx.putImageData(imageData, dx, dy);
+          
+          lastX = e.clientX;
+          lastY = e.clientY;
+        } else {
+          ctx.lineWidth = erasing ? 50 : 3;
+          ctx.lineCap = 'round';
+          ctx.strokeStyle = erasing ? 'black' : currentColor;
 
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(e.clientX, e.clientY);
+          ctx.lineTo(e.clientX, e.clientY);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(e.clientX, e.clientY);
+        }
       }
 
       if (erasing) {
